@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/miMessage"
+     android:title="Message"
+     android:icon="@drawable/ic_message"/>
+    <item android:id="@+id/miContact"
+        android:title="Contact"
+        android:icon="@drawable/ic_contact"/>
+    <item android:id="@+id/miDiary"
+        android:title="Diary"
+        android:icon="@drawable/ic_time"/>
+    <item android:id="@+id/miProfile"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile"/>
+</menu>

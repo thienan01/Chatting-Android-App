@@ -15,15 +15,20 @@
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable/ic_back.xml" value="0.126" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.113" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable/line.xml" value="0.1625" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_bottom_bar.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_chat.xml" value="0.184375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_main2.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_sign_in.xml" value="0.22" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_sign_up.xml" value="0.22" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_user.xml" value="0.22" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/fragment_contact.xml" value="0.259375" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/fragment_message.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_received_message.xml" value="0.22" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_recent_conversation.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_sent_message.xml" value="0.184375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_user.xml" value="0.22" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/menu/bottom_nav_menu.xml" value="0.259375" />
       </map>
     </option>
   </component>

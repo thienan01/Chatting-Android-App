@@ -1,10 +1,15 @@
 package hcmute.edu.vn.zaloapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -14,29 +19,31 @@ import java.util.List;
 
 import hcmute.edu.vn.zaloapp.R;
 import hcmute.edu.vn.zaloapp.adapters.UsersAdapter;
-import hcmute.edu.vn.zaloapp.databinding.ActivityUserBinding;
+import hcmute.edu.vn.zaloapp.databinding.FragmentContactBinding;
+import hcmute.edu.vn.zaloapp.databinding.FragmentMessageBinding;
 import hcmute.edu.vn.zaloapp.listeners.UserListener;
 import hcmute.edu.vn.zaloapp.models.User;
 import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
-public class UsersActivity extends AppCompatActivity implements UserListener {
-    private ActivityUserBinding binding;
+public class ContactFragment extends Fragment implements UserListener {
+    private FragmentContactBinding binding;
     private PreferenceManager preferenceManager;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        binding = FragmentContactBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityUserBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        preferenceManager = new PreferenceManager(getApplicationContext());
-        setListeners();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        preferenceManager = new PreferenceManager(getActivity().getApplicationContext());
         getUsers();
     }
 
-    private void setListeners(){
-        binding.imageBack.setOnClickListener(v->onBackPressed());
-    }
 
     private void getUsers(){
         loading(true);
@@ -89,9 +96,9 @@ public class UsersActivity extends AppCompatActivity implements UserListener {
 
     @Override
     public void onUserClicked(User user) {
-        Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
+        Intent intent = new Intent(getActivity().getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USER, user);
         startActivity(intent);
-        finish();
+        getActivity().finish();
     }
 }
