@@ -126,6 +126,34 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@color/white">
         <FrameLayout
+            android:id="@+id/layoutGallery"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/layoutMicro">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/_8sdp"
+                android:src="@drawable/ic_gallery"
+                android:tint="@color/secondary_text"/>
+        </FrameLayout>
+        <FrameLayout
+            android:id="@+id/layoutMicro"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_40sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/layoutSend">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/_8sdp"
+                android:src="@drawable/ic_micro"
+                android:tint="@color/secondary_text"/>
+        </FrameLayout>
+        <FrameLayout
             android:id="@+id/layoutSend"
             android:layout_width="@dimen/_40sdp"
             android:layout_height="@dimen/_40sdp"
@@ -156,7 +184,7 @@
             android:imeOptions="actionDone"
             android:importantForAutofill="no"
             android:inputType="text"
-            app:layout_constraintEnd_toStartOf="@id/layoutSend"
+            app:layout_constraintEnd_toStartOf="@id/layoutGallery"
             app:layout_constraintTop_toTopOf="@id/layoutSend"
             app:layout_constraintBottom_toBottomOf="@id/layoutSend"
             app:layout_constraintStart_toStartOf="parent"/>

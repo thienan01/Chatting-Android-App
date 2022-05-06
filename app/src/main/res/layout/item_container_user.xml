@@ -31,7 +31,7 @@
         android:textColor="@color/primary_text"
         android:textSize="@dimen/_13ssp"
         app:layout_constraintBottom_toTopOf="@id/viewSupporter"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/icCall"
         app:layout_constraintStart_toEndOf="@id/imageProfile"/>
     <TextView
         android:id="@+id/textPhoneNum"
@@ -43,10 +43,34 @@
         android:maxLines="1"
         android:textColor="@color/secondary_text"
         android:textSize="@dimen/_10ssp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/icCall"
         app:layout_constraintStart_toEndOf="@id/imageProfile"
         app:layout_constraintTop_toBottomOf="@id/textName"/>
-
+    <FrameLayout
+        android:id="@+id/icVideoCall"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_video_call_outline"/>
+    </FrameLayout>
+    <FrameLayout
+        android:id="@+id/icCall"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@id/icVideoCall"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_call_outline"
+            android:layout_marginEnd="20dp"/>
+    </FrameLayout>
 
 
 

@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable-v24/background_top.xml" value="0.1715" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.113" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable/background_chat_input.xml" value="0.126" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/drawable/background_content_bottom.xml" value="0.126" />
@@ -24,6 +25,7 @@
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/activity_user.xml" value="0.22" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/fragment_contact.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/fragment_message.xml" value="0.259375" />
+        <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/fragment_profile.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_received_message.xml" value="0.22" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_recent_conversation.xml" value="0.259375" />
         <entry key="..\:/Course 2022-2023/Mobile programing/ZaloApp/app/src/main/res/layout/item_container_sent_message.xml" value="0.184375" />

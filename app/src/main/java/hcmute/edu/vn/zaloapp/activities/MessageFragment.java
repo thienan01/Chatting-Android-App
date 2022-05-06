@@ -57,9 +57,7 @@ public class MessageFragment extends Fragment implements ConversationListener {
         super.onViewCreated(view, savedInstanceState);
         preferenceManager = new PreferenceManager(getActivity().getApplicationContext());
         init();
-        loadUserDetails();
         getToken();
-        setListener();
         listenerConversation();
     }
 
@@ -70,15 +68,6 @@ public class MessageFragment extends Fragment implements ConversationListener {
         database = FirebaseFirestore.getInstance();
     }
 
-    private void setListener(){
-        binding.imageSignOut.setOnClickListener(v-> signOut());
-    }
-    private void loadUserDetails(){
-        binding.txtName.setText(preferenceManager.getString(Constants.KEY_NAME));
-        byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE),Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
-        binding.imageProfile.setImageBitmap(bitmap);
-    }
 
     private void showToast(String message){
         Toast.makeText(getActivity().getApplicationContext(),message,Toast.LENGTH_SHORT).show();

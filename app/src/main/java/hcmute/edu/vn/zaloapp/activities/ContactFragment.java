@@ -42,9 +42,14 @@ public class ContactFragment extends Fragment implements UserListener {
         super.onViewCreated(view, savedInstanceState);
         preferenceManager = new PreferenceManager(getActivity().getApplicationContext());
         getUsers();
+        setListener();
     }
 
-
+    private void setListener(){
+        binding.imageBack.setOnClickListener(v-> {
+            startActivity(new Intent(getActivity().getApplicationContext(),MainActivity.class));
+        });
+    }
     private void getUsers(){
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();

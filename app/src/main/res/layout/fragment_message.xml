@@ -7,54 +7,76 @@
     android:background="@color/primary"
     android:layout_height="match_parent"
     tools:context=".activities.MessageFragment">
-    <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/imageProfile"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginLeft="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:background="@drawable/background_icon"
-        android:scaleType="centerCrop"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="@dimen/_8sdp"/>
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageSignOut"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
-        android:background="@drawable/background_icon"
-        android:padding="@dimen/_6sdp"
-        android:src="@drawable/ic_logout"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:tint="@color/white"/>
-    <TextView
-        android:id="@+id/txtName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14sdp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/imageProfile"
-        app:layout_constraintEnd_toStartOf="@id/imageSignOut"
-        app:layout_constraintStart_toEndOf="@id/imageProfile"
-        app:layout_constraintTop_toTopOf="@id/imageProfile"/>
+        app:layout_constraintEnd_toEndOf="parent">
+        <FrameLayout
+            android:id="@+id/searchFrameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="12dp">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_search"
+                android:tint="@color/white"/>
+        </FrameLayout>
+        <EditText
+            android:paddingStart="12dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/searchFrameLayout"
+            app:layout_constraintTop_toTopOf="@id/searchFrameLayout"
+            app:layout_constraintBottom_toBottomOf="@id/searchFrameLayout"
+            app:layout_constraintEnd_toStartOf="@id/qrIcon"
+            android:inputType="text"
+            android:background="#00FFFFFF"
+            android:hint="Find your friends, message ..."
+            android:textColorHint="#ABF9F9F9" />
+        <FrameLayout
+            android:id="@+id/addIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_add"
+                android:tint="@color/white"
+                android:layout_marginEnd="12dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/qrIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toStartOf="@id/addIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_qr"
+                android:tint="@color/white"
+                android:layout_marginEnd="12dp"/>
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_16sdp"
         android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imageProfile">
+        app:layout_constraintTop_toBottomOf="@id/topBar">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/conversationsRecycleView"
             android:layout_width="match_parent"
@@ -62,7 +84,7 @@
             android:clipToPadding="false"
             android:orientation="vertical"
             android:overScrollMode="never"
-            android:padding="@dimen/_20sdp"
+            android:padding="@dimen/_10sdp"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
         <ProgressBar

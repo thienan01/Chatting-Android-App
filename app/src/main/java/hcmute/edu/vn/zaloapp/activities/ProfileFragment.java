@@ -1,66 +1,80 @@
 package hcmute.edu.vn.zaloapp.activities;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 import hcmute.edu.vn.zaloapp.R;
+import hcmute.edu.vn.zaloapp.databinding.FragmentProfileBinding;
+import hcmute.edu.vn.zaloapp.utilities.Constants;
+import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public ProfileFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
+    private FragmentProfileBinding binding;
+    private PreferenceManager preferenceManager;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        binding = FragmentProfileBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        preferenceManager = new PreferenceManager(getActivity().getApplicationContext());
+        loadUserDetails();
+        setListener();
+    }
+    private void loadUserDetails(){
+        binding.txtName.setText(preferenceManager.getString(Constants.KEY_NAME));
+        binding.phoneNumber.setText(preferenceManager.getString(Constants.KEY_PHONE_NUMBER));
+        byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE),Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+        binding.imageProfile.setImageBitmap(bitmap);
+    }
+    private void setListener(){
+        binding.txtLogout.setOnClickListener(v-> signOut());
+        binding.imageBack.setOnClickListener(v-> {
+            startActivity(new Intent(getActivity().getApplicationContext(),MainActivity.class));
+        });
+    }
+
+    private void showToast(String message){
+        Toast.makeText(getActivity().getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+    }
+
+    private void signOut(){
+        showToast("Signing out...");
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        DocumentReference documentReference =
+                database.collection(Constants.KEY_COLLECTION_USERS)
+                        .document(preferenceManager.getString(Constants.KEY_USER_ID));
+        HashMap<String,Object> updates = new HashMap<>();
+        updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());
+        documentReference.update(updates)
+                .addOnSuccessListener(unused -> {
+                    preferenceManager.clear();
+                    startActivity(new Intent(getActivity().getApplicationContext(), SignInActivity.class));
+                    getActivity().finish();
+                })
+                .addOnFailureListener(e -> showToast("Unable to logout"));
     }
 }
