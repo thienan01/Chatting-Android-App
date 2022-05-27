@@ -1,11 +1,19 @@
 package hcmute.edu.vn.zaloapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
@@ -19,6 +27,9 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import hcmute.edu.vn.zaloapp.R;
 import hcmute.edu.vn.zaloapp.adapters.ChatAdapter;
@@ -35,7 +47,7 @@ import hcmute.edu.vn.zaloapp.models.User;
 import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends BaseActivity {
 
     private ActivityChatBinding binding;
     private  User receiverUser;
@@ -44,17 +56,44 @@ public class ChatActivity extends AppCompatActivity {
     private PreferenceManager preferenceManager;
     private FirebaseFirestore database;
     private  String conversationId;
-
+    private boolean isVisible;
+    private  String encodedImage;
+    private  boolean isReceiverAvailable = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        isVisible = false;
+        encodedImage = "";
+        cameraPermission();
         setListener();
         loadReceiverDetail();
         init();
         listenMessages();
     }
+
+    private void cameraPermission(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, 101);
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 101){
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            binding.previewImage.setImageBitmap(photo);
+            encodedImage = encodeImage(photo);
+            binding.previewImgLayout.setVisibility(View.VISIBLE);
+            binding.pickImageFrom.setVisibility(View.GONE);
+        }
+    }
+
     private void init(){
         preferenceManager = new PreferenceManager(getApplicationContext());
         chatMessages = new ArrayList<>();
@@ -67,15 +106,52 @@ public class ChatActivity extends AppCompatActivity {
         database = FirebaseFirestore.getInstance();
     }
 
+    private void listenAvailabilityOfReceiver(){
+        database.collection(Constants.KEY_COLLECTION_USERS).document(
+                receiverUser.id
+        ).addSnapshotListener(ChatActivity.this,(value, error) -> {
+            if (error!=null){
+                return;
+            }
+            if (value!=null){
+                if (value.getLong(Constants.KEY_AVAILABILITY) != null){
+                    int availability = Objects.requireNonNull(
+                            value.getLong(Constants.KEY_AVAILABILITY)
+                    ).intValue();
+                    isReceiverAvailable = availability == 1;
+                }
+            }
+            if (isReceiverAvailable) {
+
+                binding.activeStatus.setText("Active now");
+                binding.iconStatus.setVisibility(View.VISIBLE);
+            }
+            else {
+                binding.activeStatus.setText("Not active");
+                binding.iconStatus.setVisibility(View.GONE);
+            }
+
+        });
+    }
+
     private void sendMessage(){
         HashMap<String,Object> message = new HashMap<>();
-        if (binding.inputMessage.getText().toString().equals("")){
+        if (binding.inputMessage.getText().toString().equals("") && encodedImage.equals("")){
             Toast.makeText(this, "Enter your message", Toast.LENGTH_SHORT).show();
         }
         else {
             message.put(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID));
             message.put(Constants.KEY_RECEIVER_ID, receiverUser.id);
-            message.put(Constants.KEY_MESSAGE, binding.inputMessage.getText().toString());
+            if (encodedImage.equals("")){
+                message.put(Constants.KEY_MESSAGE, binding.inputMessage.getText().toString());
+            }
+            else {
+                message.put(Constants.KEY_MESSAGE, encodedImage);
+                binding.inputMessage.setText("");
+                encodedImage = "";
+                binding.previewImgLayout.setVisibility(View.GONE);
+            }
+
             message.put(Constants.KEY_TIMESTAMP, new Date());
             database.collection(Constants.KEY_COLLECTION_CHAT).add(message);
             if (conversationId != null){
@@ -105,6 +181,7 @@ public class ChatActivity extends AppCompatActivity {
                 .whereEqualTo(Constants.KEY_SENDER_ID, receiverUser.id)
                 .whereEqualTo(Constants.KEY_RECEIVER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .addSnapshotListener(eventListener);
+
     }
     private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
         if (error != null){
@@ -118,6 +195,13 @@ public class ChatActivity extends AppCompatActivity {
                     chatMessage.senderID = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
                     chatMessage.receiverID = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
                     chatMessage.message = documentChange.getDocument().getString(Constants.KEY_MESSAGE);
+                    if (chatMessage.message.length() > 200){
+                        chatMessage.image = chatMessage.message;
+                        chatMessage.message = "";
+                    }
+                    else {
+                        chatMessage.image = "";
+                    }
                     chatMessage.dateTime = getReadableDateTime(documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP));
                     chatMessage.dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
                     chatMessages.add(chatMessage);
@@ -152,6 +236,32 @@ public class ChatActivity extends AppCompatActivity {
             startActivity(new Intent(getApplicationContext(),MainActivity.class));
         });
         binding.layoutSend.setOnClickListener(v -> sendMessage());
+
+        binding.layoutGallery.setOnClickListener(v -> {
+            if (!isVisible){
+                binding.pickImageFrom.setVisibility(View.VISIBLE);
+                isVisible = true;
+            }
+            else {
+                binding.pickImageFrom.setVisibility(View.GONE   );
+                isVisible = false;
+            }
+
+        });
+
+        binding.GalleryBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            pickImage.launch(intent);
+        });
+
+        binding.CameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(open_camera, 101);
+            }
+        });
     }
 
     private String getReadableDateTime(Date date){
@@ -199,4 +309,41 @@ public class ChatActivity extends AppCompatActivity {
             conversationId = documentSnapshot.getId();
         }
     };
+
+    private  String encodeImage(Bitmap bitmap){
+        int previewWidth = 150;
+        int previewHeight = bitmap.getHeight()*previewWidth/bitmap.getWidth();
+        Bitmap previewBitmap = Bitmap.createScaledBitmap(bitmap,previewWidth,previewHeight,false);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        previewBitmap.compress(Bitmap.CompressFormat.JPEG,50,byteArrayOutputStream);
+        byte[] bytes =  byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(bytes,Base64.DEFAULT);
+    }
+
+    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK){
+                    if (result.getData() != null){
+                        Uri imageUri = result.getData().getData();
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            binding.previewImgLayout.setVisibility(View.VISIBLE);
+                            binding.pickImageFrom.setVisibility(View.GONE);
+                            binding.previewImage.setImageBitmap(bitmap);
+                            encodedImage   = encodeImage(bitmap);
+                        }catch (FileNotFoundException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+    );
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        listenAvailabilityOfReceiver();
+    }
 }

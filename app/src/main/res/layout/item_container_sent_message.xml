@@ -18,12 +18,22 @@
         android:paddingBottom="@dimen/_8sdp"
         app:layout_constraintWidth_max="wrap"
         app:layout_constraintWidth_percent="0.8">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imageMessage"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_200sdp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/textDateTime"
+            android:visibility="gone"
+            android:scaleType="fitCenter" />
         <TextView
             android:id="@+id/textMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/textDateTime"
             android:textColor="@color/black"
             android:textSize="@dimen/_13ssp" />
         <TextView
@@ -33,8 +43,9 @@
             android:layout_marginTop="@dimen/_4sdp"
             android:textColor="@color/secondary_text"
             android:textSize="@dimen/_8ssp"
+            android:text="this is date"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textMessage"
+            app:layout_constraintBottom_toBottomOf="parent"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

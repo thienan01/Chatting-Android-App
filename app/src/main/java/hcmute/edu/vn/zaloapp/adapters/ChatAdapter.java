@@ -1,7 +1,10 @@
 package hcmute.edu.vn.zaloapp.adapters;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -9,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import hcmute.edu.vn.zaloapp.R;
 import hcmute.edu.vn.zaloapp.databinding.ItemContainerReceivedMessageBinding;
 import hcmute.edu.vn.zaloapp.databinding.ItemContainerSentMessageBinding;
 import hcmute.edu.vn.zaloapp.databinding.ItemContainerUserBinding;
@@ -85,7 +89,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
 
         void setData(ChatMessage chatMessage){
-            binding.textMessage.setText(chatMessage.message);
+
+            if (chatMessage.message != "" && chatMessage.image == ""){
+                binding.textMessage.setText(chatMessage.message);
+                binding.imageMessage.setVisibility(View.GONE);
+            }
+            else if (chatMessage.image !="" && chatMessage.message == ""){
+                binding.imageMessage.setImageBitmap(getImageMessage(chatMessage.image));
+                binding.imageMessage.setVisibility(View.VISIBLE);
+                binding.textMessage.setVisibility(View.GONE);
+            }
+            else {
+                binding.imageMessage.setImageResource(R.drawable.logo);
+                binding.textMessage.setText("");
+            }
             binding.textDateTime.setText(chatMessage.dateTime);
         }
     }
@@ -97,9 +114,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerReceivedMessageBinding;
         }
         void setData(ChatMessage chatMessage, Bitmap receiverProfileImage){
-            binding.textMessage.setText(chatMessage.message);
+
+            if (chatMessage.message != "" && chatMessage.image == ""){
+                binding.textMessage.setText(chatMessage.message);
+                binding.imageMessage.setVisibility(View.GONE);
+            }
+            else if (chatMessage.image !="" && chatMessage.message == ""){
+                binding.imageMessage.setImageBitmap(getImageMessage(chatMessage.image));
+                binding.imageMessage.setVisibility(View.VISIBLE);
+            }
+            else {
+                binding.imageMessage.setImageResource(R.drawable.logo);
+                binding.textMessage.setText("");
+            }
+
             binding.textDateTime.setText(chatMessage.dateTime);
             binding.imageProfile.setImageBitmap(receiverProfileImage);
         }
+    }
+    private static Bitmap getImageMessage(String encodedImage){
+        byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
     }
 }

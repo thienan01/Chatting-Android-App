@@ -40,11 +40,10 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-
+    // Scalable Size Unit
     implementation 'com.intuit.sdp:sdp-android:1.0.6'
     implementation 'com.intuit.ssp:ssp-android:1.0.6'
 
-    // Scalable Size Unit
     implementation 'com.makeramen:roundedimageview:2.3.0'
     //rounded img view
     implementation platform('com.google.firebase:firebase-bom:29.2.1')
@@ -53,4 +52,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:24.1.0'
     //multi dex
     implementation 'androidx.multidex:multidex:2.0.1'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+
+
 }

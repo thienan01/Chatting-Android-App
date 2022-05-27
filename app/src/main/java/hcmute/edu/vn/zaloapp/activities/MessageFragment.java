@@ -59,8 +59,14 @@ public class MessageFragment extends Fragment implements ConversationListener {
         init();
         getToken();
         listenerConversation();
+        setListener();
     }
 
+    private void setListener(){
+        binding.addIcon.setOnClickListener(v->{
+            startActivity(new Intent(getActivity().getApplicationContext(), ContactFragment.class));
+        });
+    }
     private void init(){
         conversation = new ArrayList<>();
         conversationsAdapter = new RecentConversationsAdapter(conversation,this);
