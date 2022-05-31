@@ -138,6 +138,7 @@ public class MessageFragment extends Fragment implements ConversationListener {
 
     }
     private void updateToken(String token){
+        preferenceManager.putString(Constants.KEY_FCM_TOKEN, token);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         DocumentReference documentReference =
                 database.collection(Constants.KEY_COLLECTION_USERS).document(
@@ -145,22 +146,6 @@ public class MessageFragment extends Fragment implements ConversationListener {
                 );
         documentReference.update(Constants.KEY_FCM_TOKEN, token)
                 .addOnFailureListener(e -> showToast("Unable to update token"));
-    }
-    private void signOut(){
-        showToast("Signing out...");
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
-        DocumentReference documentReference =
-                database.collection(Constants.KEY_COLLECTION_USERS)
-                        .document(preferenceManager.getString(Constants.KEY_USER_ID));
-        HashMap<String,Object> updates = new HashMap<>();
-        updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());
-        documentReference.update(updates)
-                .addOnSuccessListener(unused -> {
-                    preferenceManager.clear();
-                    startActivity(new Intent(getActivity().getApplicationContext(), SignInActivity.class));
-                    getActivity().finish();
-                })
-                .addOnFailureListener(e -> showToast("Unable to logout"));
     }
 
     @Override

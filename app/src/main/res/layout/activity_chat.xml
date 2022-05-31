@@ -7,6 +7,7 @@
     android:animateLayoutChanges="true"
     android:background="@color/primary"
     tools:context=".activities.ChatActivity">
+
     <View
         android:id="@+id/viewBackground"
         android:layout_width="match_parent"
@@ -14,6 +15,7 @@
         android:background="@drawable/background_content_top"
         app:layout_constraintBottom_toTopOf="@id/layoutInput"
         app:layout_constraintTop_toTopOf="parent"/>
+
     <View
         android:id="@+id/headerBackground"
         android:layout_width="match_parent"
@@ -116,18 +118,6 @@
         android:background="@color/primary"
         android:layout_marginTop="@dimen/_5sdp"
         app:layout_constraintTop_toBottomOf="@id/imageBack"/>
-    <TextView
-        android:id="@+id/textAvailability"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/viewSupporter"
-        android:background="#008000"
-        android:textSize="@dimen/_10ssp"
-        android:textColor="@color/white"
-        android:padding="@dimen/_2sdp"
-        android:text="Online"
-        android:gravity="center"
-        android:visibility="gone"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
         android:layout_width="match_parent"
@@ -139,7 +129,7 @@
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="@id/viewBackground"
-        app:layout_constraintTop_toBottomOf="@id/textAvailability"/>
+        app:layout_constraintTop_toBottomOf="@id/viewSupporter"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -276,6 +266,22 @@
                     android:textSize="@dimen/_16sdp"/>
             </LinearLayout>
         </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/Option"
+        android:layout_width="@dimen/_100sdp"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="@dimen/_8sdp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/_30sdp"
+        app:layout_constraintEnd_toEndOf="parent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Delete"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_16sdp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/previewImgLayout"

@@ -21,12 +21,15 @@ import hcmute.edu.vn.zaloapp.models.ChatMessage;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private final List<ChatMessage> chatMessages;
-    private final Bitmap receiverProfileImage;
+    private  Bitmap receiverProfileImage;
     private final  String senderID;
 
     public  static  final  int VIEW_TYPE_SENT = 1;
     public  static  final  int VIEW_TYPE_RECEIVED = 2;
 
+    public void setReceiverProfileImage(Bitmap bitmap){
+        receiverProfileImage = bitmap;
+    }
     public ChatAdapter(List<ChatMessage> chatMessages, Bitmap receiverProfileImage, String senderID) {
         this.chatMessages = chatMessages;
         this.receiverProfileImage = receiverProfileImage;
@@ -129,7 +132,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             }
 
             binding.textDateTime.setText(chatMessage.dateTime);
-            binding.imageProfile.setImageBitmap(receiverProfileImage);
+
+            if (receiverProfileImage != null){
+                binding.imageProfile.setImageBitmap(receiverProfileImage);
+            }
+
         }
     }
     private static Bitmap getImageMessage(String encodedImage){

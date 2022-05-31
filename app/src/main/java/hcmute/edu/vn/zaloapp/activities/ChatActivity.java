@@ -2,6 +2,7 @@ package hcmute.edu.vn.zaloapp.activities;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -17,15 +18,18 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
-
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.firebase.events.Event;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -44,8 +48,13 @@ import hcmute.edu.vn.zaloapp.adapters.ChatAdapter;
 import hcmute.edu.vn.zaloapp.databinding.ActivityChatBinding;
 import hcmute.edu.vn.zaloapp.models.ChatMessage;
 import hcmute.edu.vn.zaloapp.models.User;
+import hcmute.edu.vn.zaloapp.network.ApiClient;
+import hcmute.edu.vn.zaloapp.network.ApiService;
 import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChatActivity extends BaseActivity {
 
@@ -106,6 +115,46 @@ public class ChatActivity extends BaseActivity {
         database = FirebaseFirestore.getInstance();
     }
 
+
+    private void showToast(String message){
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendNotification(String messageBody){
+        ApiClient.getClient().create(ApiService.class).sendMessage(
+                Constants.getRemoteMSGHeaders(),
+                messageBody
+        ).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NonNull Call<String> call,@NonNull Response<String> response) {
+                if (response.isSuccessful()){
+                    try {
+                        if (response.body() != null){
+                            JSONObject responseJson = new JSONObject(response.body());
+                            JSONArray results = responseJson.getJSONArray("results");
+                            if (responseJson.getInt("failure") == 1){
+                                JSONObject error = (JSONObject) results.get(0);
+                                showToast(error.getString("error"));
+                                return;
+                            }
+                        }
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                    showToast("Notification sent successfull");
+                }
+                else {
+                    showToast("Error: "+ response.code() );
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<String> call,@NonNull Throwable t) {
+                showToast(t.getMessage());
+            }
+        });
+    }
     private void listenAvailabilityOfReceiver(){
         database.collection(Constants.KEY_COLLECTION_USERS).document(
                 receiverUser.id
@@ -119,6 +168,12 @@ public class ChatActivity extends BaseActivity {
                             value.getLong(Constants.KEY_AVAILABILITY)
                     ).intValue();
                     isReceiverAvailable = availability == 1;
+                }
+                receiverUser.token = value.getString(Constants.KEY_FCM_TOKEN);
+                if (receiverUser.image == null){
+                    receiverUser.image = value.getString(Constants.KEY_IMAGE);
+                    chatAdapter.setReceiverProfileImage(getBitmapFromEncodedString(receiverUser.image));
+                    chatAdapter.notifyItemRangeChanged(0,chatMessages.size());
                 }
             }
             if (isReceiverAvailable) {
@@ -167,6 +222,26 @@ public class ChatActivity extends BaseActivity {
                 conversation.put(Constants.KEY_LAST_MESSAGE, binding.inputMessage.getText().toString());
                 conversation.put(Constants.KEY_TIMESTAMP, new Date());
                 addConversation(conversation);
+            }
+            if (!isReceiverAvailable){
+                try {
+                    JSONArray tokens = new JSONArray();
+                    tokens.put(receiverUser.token);
+
+                    JSONObject data = new JSONObject();
+                    data.put(Constants.KEY_USER_ID, preferenceManager.getString(Constants.KEY_USER_ID));
+                    data.put(Constants.KEY_NAME, preferenceManager.getString(Constants.KEY_NAME));
+                    data.put(Constants.KEY_FCM_TOKEN, preferenceManager.getString(Constants.KEY_FCM_TOKEN));
+                    data.put(Constants.KEY_MESSAGE, binding.inputMessage.getText().toString());
+
+                    JSONObject body = new JSONObject();
+                    body.put(Constants.REMOTE_MSG_DATA,data);
+                    body.put(Constants.REMOTE_MSG_REGISTRATION_IDS, tokens);
+
+                    sendNotification(body.toString());
+                }catch (Exception e){
+                    showToast(e.getMessage());
+                }
             }
             binding.inputMessage.setText(null);
         }
@@ -223,8 +298,13 @@ public class ChatActivity extends BaseActivity {
         }
     };
     private Bitmap getBitmapFromEncodedString(String encodedImage){
-        byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+        if (encodedImage != null){
+            byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+        }else {
+            return  null;
+        }
+
     }
     private void loadReceiverDetail(){
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
@@ -261,6 +341,12 @@ public class ChatActivity extends BaseActivity {
                 Intent open_camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(open_camera, 101);
             }
+        });
+        binding.imageInfo.setOnClickListener(v->{
+            binding.Option.setVisibility(View.VISIBLE);
+        });
+        binding.Option.setOnClickListener(v->{
+            deleteConversation();
         });
     }
 
@@ -340,6 +426,37 @@ public class ChatActivity extends BaseActivity {
                 }
             }
     );
+
+    private void deleteConversation(){
+        database.collection(Constants.KEY_COLLECTION_CONVERSATION)
+                .whereEqualTo(Constants.KEY_RECEIVER_ID,receiverUser.id)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null){
+                        DocumentSnapshot documentSnapshot = task.getResult().getDocuments().get(0);
+                        String ConversationId = documentSnapshot.getId();
+                        database.collection(Constants.KEY_COLLECTION_CONVERSATION)
+                                .document(ConversationId)
+                                .delete();
+                    }
+                });
+        database.collection(Constants.KEY_COLLECTION_CHAT)
+                .whereEqualTo(Constants.KEY_RECEIVER_ID,receiverUser.id)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null){
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()){
+                            String chatId = queryDocumentSnapshot.getId();
+                            database.collection(Constants.KEY_COLLECTION_CHAT)
+                                    .document(chatId)
+                                    .delete();
+                            onBackPressed();
+                        }
+
+                    }
+                });
+        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+    }
 
     @Override
     protected void onResume() {
