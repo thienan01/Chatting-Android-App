@@ -27,6 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.jitsi.meet.sdk.JitsiMeet;
+import org.jitsi.meet.sdk.JitsiMeetActivity;
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +37,8 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +48,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import hcmute.edu.vn.zaloapp.R;
 import hcmute.edu.vn.zaloapp.adapters.ChatAdapter;
 import hcmute.edu.vn.zaloapp.databinding.ActivityChatBinding;
 import hcmute.edu.vn.zaloapp.models.ChatMessage;
@@ -65,7 +69,9 @@ public class ChatActivity extends BaseActivity {
     private PreferenceManager preferenceManager;
     private FirebaseFirestore database;
     private  String conversationId;
-    private boolean isVisible;
+    private boolean isPickImageVisible;
+    private  boolean isOptionLayoutVisible;
+    private boolean isVideoCallLayoutVisible;
     private  String encodedImage;
     private  boolean isReceiverAvailable = false;
     @Override
@@ -73,7 +79,9 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        isVisible = false;
+        isPickImageVisible = false;
+        isOptionLayoutVisible = false;
+        isVideoCallLayoutVisible = false;
         encodedImage = "";
         cameraPermission();
         setListener();
@@ -142,7 +150,6 @@ public class ChatActivity extends BaseActivity {
                     catch (JSONException e){
                         e.printStackTrace();
                     }
-                    showToast("Notification sent successfull");
                 }
                 else {
                     showToast("Error: "+ response.code() );
@@ -318,13 +325,13 @@ public class ChatActivity extends BaseActivity {
         binding.layoutSend.setOnClickListener(v -> sendMessage());
 
         binding.layoutGallery.setOnClickListener(v -> {
-            if (!isVisible){
+            if (!isPickImageVisible){
                 binding.pickImageFrom.setVisibility(View.VISIBLE);
-                isVisible = true;
+                isPickImageVisible = true;
             }
             else {
                 binding.pickImageFrom.setVisibility(View.GONE   );
-                isVisible = false;
+                isPickImageVisible = false;
             }
 
         });
@@ -343,10 +350,30 @@ public class ChatActivity extends BaseActivity {
             }
         });
         binding.imageInfo.setOnClickListener(v->{
-            binding.Option.setVisibility(View.VISIBLE);
+            if (isOptionLayoutVisible == false){
+                binding.Option.setVisibility(View.VISIBLE);
+                isOptionLayoutVisible = true;
+            }
+            else{
+                binding.Option.setVisibility(View.GONE);
+                isOptionLayoutVisible = false;
+            }
+        });
+        binding.imageVideoCall.setOnClickListener(v->{
+            if (!isVideoCallLayoutVisible){
+                binding.videoCallLayout.setVisibility(View.VISIBLE);
+                isVideoCallLayoutVisible = true;
+            }
+            else {
+                binding.videoCallLayout.setVisibility(View.GONE);
+                isVideoCallLayoutVisible = false;
+            }
         });
         binding.Option.setOnClickListener(v->{
             deleteConversation();
+        });
+        binding.JoinBtn.setOnClickListener(v->{
+            makeVideoCall();
         });
     }
 
@@ -456,6 +483,32 @@ public class ChatActivity extends BaseActivity {
                     }
                 });
         startActivity(new Intent(getApplicationContext(),MainActivity.class));
+    }
+
+    private void makeVideoCall(){
+        URL serverURL;
+        try {
+            serverURL = new URL("https://meet.jit.si");
+            JitsiMeetConferenceOptions defaultOptions =
+                    new JitsiMeetConferenceOptions.Builder()
+                            .setServerURL(serverURL)
+                            .setWelcomePageEnabled(false)
+                            .build();
+            JitsiMeet.setDefaultConferenceOptions(defaultOptions);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        binding.JoinBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JitsiMeetConferenceOptions options = new JitsiMeetConferenceOptions.Builder()
+                        .setRoom(binding.secretCode.getText().toString())
+                        .setWelcomePageEnabled(false)
+                        .build();
+
+                JitsiMeetActivity.launch(ChatActivity.this, options);
+            }
+        });
     }
 
     @Override

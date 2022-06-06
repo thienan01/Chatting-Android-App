@@ -275,6 +275,7 @@
         android:padding="@dimen/_8sdp"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="@dimen/_30sdp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent">
         <TextView
             android:layout_width="match_parent"
@@ -299,5 +300,42 @@
             android:layout_height="match_parent"
             android:scaleType="fitCenter"
             android:src="@drawable/logo"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/videoCallLayout"
+        android:layout_width="@dimen/_250sdp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/videocall_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        android:padding="@dimen/_16sdp">
+        <EditText
+            android:id="@+id/secretCode"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_35sdp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:hint="Enter secret code"
+            android:background="@drawable/background_input"
+            android:textAlignment="center"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/JoinBtn"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp"
+            android:text="Call"
+            android:textSize="@dimen/_13sdp"
+            android:textStyle="bold"
+            app:cornerRadius="@dimen/_8sdp"
+            android:backgroundTint="@color/primary_3nd"
+            app:layout_constraintTop_toBottomOf="@id/secretCode"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/_6sdp"/>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

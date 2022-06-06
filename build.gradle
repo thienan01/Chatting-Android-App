@@ -3,17 +3,25 @@ buildscript {
     repositories {
         // Check that you have the following line (if not, add it):
         google()  // Google's Maven repository
+        jcenter()
+
     }
     dependencies {
         // Add this line
+        classpath "com.android.tools.build:gradle:4.0.1"
         classpath 'com.google.gms:google-services:4.3.10'
 
     }
 }
 
-plugins {
-    id 'com.android.application' version '7.1.1' apply false
-    id 'com.android.library' version '7.1.1' apply false
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases"
+        }
+    }
 }
 task clean(type: Delete) {
     delete rootProject.buildDir
