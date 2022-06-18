@@ -140,6 +140,7 @@
         app:layout_constraintStart_toStartOf="@id/viewBackground"
         app:layout_constraintTop_toTopOf="@id/viewBackground"/>
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutInput"
         android:layout_width="match_parent"
@@ -153,7 +154,8 @@
             android:layout_width="@dimen/_40sdp"
             android:layout_height="@dimen/_40sdp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/layoutMicro">
+            app:layout_constraintEnd_toStartOf="@id/layoutMicro"
+            android:visibility="visible">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="match_parent"
@@ -169,13 +171,14 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/layoutSend">
 
-            <androidx.appcompat.widget.AppCompatImageView
+            <ImageView
+                android:id="@+id/recordBtn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="@dimen/_8sdp"
-                android:src="@drawable/ic_micro"
-                android:tint="@color/secondary_text"/>
+                android:src="@drawable/ic_micro" />
         </FrameLayout>
+
         <FrameLayout
             android:id="@+id/layoutSend"
             android:layout_width="@dimen/_40sdp"
@@ -210,7 +213,8 @@
             app:layout_constraintEnd_toStartOf="@id/layoutGallery"
             app:layout_constraintTop_toTopOf="@id/layoutSend"
             app:layout_constraintBottom_toBottomOf="@id/layoutSend"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="visible"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pickImageFrom"

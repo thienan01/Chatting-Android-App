@@ -51,6 +51,7 @@ dependencies {
     //Firebase
     implementation 'com.google.firebase:firebase-messaging:23.0.2'
     implementation 'com.google.firebase:firebase-firestore:24.1.0'
+    implementation 'com.google.firebase:firebase-storage'
     //multi dex
     implementation 'androidx.multidex:multidex:2.0.1'
 

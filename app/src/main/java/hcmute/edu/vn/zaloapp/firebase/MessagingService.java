@@ -26,22 +26,23 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d("FCM", "Token NE BACON: " + token);
     }
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        User user = new User();
-        user.id = remoteMessage.getData().get(Constants.KEY_USER_ID);
-        user.name = remoteMessage.getData().get(Constants.KEY_NAME);
-        user.token = remoteMessage.getData().get(Constants.KEY_FCM_TOKEN);
+        User user = new User(); // create new user object
+        user.id = remoteMessage.getData().get(Constants.KEY_USER_ID); //get user id from database
+        user.name = remoteMessage.getData().get(Constants.KEY_NAME);//get user name from database
+        user.token = remoteMessage.getData().get(Constants.KEY_FCM_TOKEN);//get user token from database
 
-        int notificationId  = new Random().nextInt();
-        String channelId = "chat_message";
+        int notificationId  = new Random().nextInt(); // random id
+        String channelId = "chat_message"; //set channel
         Intent intent = new Intent(this, ChatActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra(Constants.KEY_USER, user);
+        intent.putExtra(Constants.KEY_USER, user); // send data to other activity
+
+        //configure notification
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent,0);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
         builder.setSmallIcon(R.drawable.ic_notificaiton);

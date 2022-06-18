@@ -29,9 +29,9 @@ import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
 public class SignUpActivity extends AppCompatActivity {
-    private ActivitySignUpBinding binding;
-    private  String encodedImage;
-    private PreferenceManager preferenceManager;
+    private ActivitySignUpBinding binding; //get view through binding
+    private  String encodedImage; //store encoded image string
+    private PreferenceManager preferenceManager; //get data stored in preferenceManager
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +40,7 @@ public class SignUpActivity extends AppCompatActivity {
         preferenceManager = new PreferenceManager(getApplicationContext());
         setListeners();
     }
-    private void setListeners(){
+    private void setListeners(){//listen button event
         binding.txtSignIn.setOnClickListener( v-> onBackPressed());
         binding.btnSignUp.setOnClickListener(v ->{
             if (isValidSignUpDetails()){
@@ -54,17 +54,19 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void showToast(String message){
+    private void showToast(String message){ // show message
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private  void signUp(){
+    private  void signUp(){ //Store user info to database and login
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String,Object> user = new HashMap<>();
         user.put(Constants.KEY_NAME, binding.inputName.getText().toString());
         user.put(Constants.KEY_PHONE_NUMBER, binding.inputPhoneNum.getText().toString());
         user.put(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString());
+        user.put(Constants.KEY_EMAIL, "");
+        user.put(Constants.KEY_ADDRESS, "");
         user.put(Constants.KEY_IMAGE, encodedImage);
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .add(user)
@@ -74,6 +76,8 @@ public class SignUpActivity extends AppCompatActivity {
                     preferenceManager.putString(Constants.KEY_USER_ID, documentReference.getId());
                     preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
                     preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
+                    preferenceManager.putString(Constants.KEY_EMAIL, "No information");
+                    preferenceManager.putString(Constants.KEY_ADDRESS, "No information");
                     Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -84,7 +88,7 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    private  String encodeImage(Bitmap bitmap){
+    private  String encodeImage(Bitmap bitmap){ // encode image to string by base64
         int previewWidth = 150;
         int previewHeight = bitmap.getHeight()*previewWidth/bitmap.getWidth();
         Bitmap previewBitmap = Bitmap.createScaledBitmap(bitmap,previewWidth,previewHeight,false);
@@ -94,7 +98,7 @@ public class SignUpActivity extends AppCompatActivity {
         return Base64.encodeToString(bytes,Base64.DEFAULT);
     }
 
-    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult( //launch gallery
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK){
@@ -114,7 +118,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
     );
 
-    private  boolean isValidSignUpDetails(){
+    private  boolean isValidSignUpDetails(){ //check input
         if (encodedImage == null){
             showToast("Select profile image");
             return false;
@@ -138,7 +142,7 @@ public class SignUpActivity extends AppCompatActivity {
             return true;
         }
     }
-    private void loading(boolean isLoading){
+    private void loading(boolean isLoading){ //enable and disable progress bar while load database
         if (isLoading){
             binding.btnSignUp.setVisibility(View.INVISIBLE);
             binding.progressBar.setVisibility(View.VISIBLE);

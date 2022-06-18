@@ -2,11 +2,14 @@ package hcmute.edu.vn.zaloapp.utilities;
 
 import java.util.HashMap;
 
+//This file store key-value that are use as constants in this project
 public class Constants {
     public static final String KEY_COLLECTION_USERS = "users";
     public static final String KEY_NAME = "name";
     public static final String KEY_PHONE_NUMBER = "phoneNumber";
     public static final String KEY_PASSWORD = "password";
+    public static final String KEY_EMAIL = "email";
+    public static final String KEY_ADDRESS = "address";
     public static final String KEY_PREFERENCE_NAME = "chatAppPreference";
     public static final String KEY_IS_SIGN_IN = "isSignIn";
     public static final String KEY_USER_ID = "userID";

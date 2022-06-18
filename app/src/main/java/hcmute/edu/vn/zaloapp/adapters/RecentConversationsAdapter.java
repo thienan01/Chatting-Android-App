@@ -18,8 +18,8 @@ import hcmute.edu.vn.zaloapp.models.User;
 
 public class RecentConversationsAdapter extends  RecyclerView.Adapter<RecentConversationsAdapter.ConversationViewHolder> {
 
-    private final List<ChatMessage> chatMessages;
-    private  final ConversationListener conversationListener;
+    private final List<ChatMessage> chatMessages; //list of conversation
+    private  final ConversationListener conversationListener; //listen the event when user click on item
 
     public RecentConversationsAdapter(List<ChatMessage> chatMessages, ConversationListener conversationListener) {
         this.chatMessages = chatMessages;
@@ -54,7 +54,7 @@ public class RecentConversationsAdapter extends  RecyclerView.Adapter<RecentConv
             super(itemContainerRecentConversationBinding.getRoot());
             binding = itemContainerRecentConversationBinding;
         }
-        void setData(ChatMessage chatMessage){
+        void setData(ChatMessage chatMessage){ //set data for view
             binding.imageProfile.setImageBitmap(getConversationImage(chatMessage.conversationImage));
             binding.textName.setText(chatMessage.conversationName);
             if (chatMessage.message.equals("")){
@@ -73,7 +73,7 @@ public class RecentConversationsAdapter extends  RecyclerView.Adapter<RecentConv
         }
     }
 
-    private Bitmap getConversationImage(String encodedImage){
+    private Bitmap getConversationImage(String encodedImage){ //decode image string to bitmap
         byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
     }

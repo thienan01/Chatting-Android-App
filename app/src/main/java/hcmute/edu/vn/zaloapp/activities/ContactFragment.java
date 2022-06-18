@@ -27,13 +27,13 @@ import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
 public class ContactFragment extends Fragment implements UserListener {
-    private FragmentContactBinding binding;
-    private PreferenceManager preferenceManager;
+    private FragmentContactBinding binding; //get view through binding
+    private PreferenceManager preferenceManager; //get data stored in preferenceManager
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        binding = FragmentContactBinding.inflate(getLayoutInflater());
+        binding = FragmentContactBinding.inflate(getLayoutInflater());// init view
         return binding.getRoot();
     }
 
@@ -45,19 +45,19 @@ public class ContactFragment extends Fragment implements UserListener {
         setListener();
     }
 
-    private void setListener(){
+    private void setListener(){// listen button event
         binding.imageBack.setOnClickListener(v-> {
             startActivity(new Intent(getActivity().getApplicationContext(),MainActivity.class));
         });
     }
-    private void getUsers(){
+    private void getUsers(){//get all user and show on Contact view
         loading(true);
-        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        FirebaseFirestore database = FirebaseFirestore.getInstance();// get instance of database
         database.collection(Constants.KEY_COLLECTION_USERS)
                 .get()
                 .addOnCompleteListener(task -> {
                     loading(false);
-                    String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
+                    String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID); //get id of user
                     if (task.isSuccessful() && task.getResult() != null){
                         List<User> users = new ArrayList<>();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()){
@@ -87,11 +87,11 @@ public class ContactFragment extends Fragment implements UserListener {
                 });
     }
 
-    private void showErrorMessage(){
+    private void showErrorMessage(){ // show message when get error
         binding.textErrorMessage.setText(String.format("%s","No user available"));
         binding.textErrorMessage.setVisibility(View.VISIBLE);
     }
-    private void loading(boolean isLoading){
+    private void loading(boolean isLoading){ //enable and disable progressbar while access database
         if (isLoading){
             binding.progressBar.setVisibility(View.VISIBLE);
         }
@@ -100,7 +100,7 @@ public class ContactFragment extends Fragment implements UserListener {
     }
 
     @Override
-    public void onUserClicked(User user) {
+    public void onUserClicked(User user) { //Call back function to get data of user when user click on item of recycle view
         Intent intent = new Intent(getActivity().getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USER, user);
         startActivity(intent);

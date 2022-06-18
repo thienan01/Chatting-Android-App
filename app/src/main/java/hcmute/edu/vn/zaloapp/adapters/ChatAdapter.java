@@ -20,9 +20,9 @@ import hcmute.edu.vn.zaloapp.models.ChatMessage;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private final List<ChatMessage> chatMessages;
-    private  Bitmap receiverProfileImage;
-    private final  String senderID;
+    private final List<ChatMessage> chatMessages; // list of message
+    private  Bitmap receiverProfileImage; //profile image of receiver
+    private final  String senderID; //store id of sender
 
     public  static  final  int VIEW_TYPE_SENT = 1;
     public  static  final  int VIEW_TYPE_RECEIVED = 2;
@@ -30,6 +30,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public void setReceiverProfileImage(Bitmap bitmap){
         receiverProfileImage = bitmap;
     }
+
     public ChatAdapter(List<ChatMessage> chatMessages, Bitmap receiverProfileImage, String senderID) {
         this.chatMessages = chatMessages;
         this.receiverProfileImage = receiverProfileImage;
@@ -91,7 +92,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             binding = itemContainerSentMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage){
+        void setData(ChatMessage chatMessage){//set data for view of item
 
             if (chatMessage.message != "" && chatMessage.image == ""){
                 binding.textMessage.setText(chatMessage.message);
@@ -116,7 +117,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             super(itemContainerReceivedMessageBinding.getRoot());
             binding = itemContainerReceivedMessageBinding;
         }
-        void setData(ChatMessage chatMessage, Bitmap receiverProfileImage){
+        void setData(ChatMessage chatMessage, Bitmap receiverProfileImage){//set data for view of item
 
             if (chatMessage.message != "" && chatMessage.image == ""){
                 binding.textMessage.setText(chatMessage.message);

@@ -27,13 +27,13 @@ import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
 public class ProfileFragment extends Fragment {
-    private FragmentProfileBinding binding;
-    private PreferenceManager preferenceManager;
+    private FragmentProfileBinding binding; //get View through binding
+    private PreferenceManager preferenceManager; //get data stored in preferenceManager
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentProfileBinding.inflate(getLayoutInflater());
-        return binding.getRoot();
+        return binding.getRoot();//init view
     }
 
     @Override
@@ -46,29 +46,34 @@ public class ProfileFragment extends Fragment {
     private void loadUserDetails(){
         binding.txtName.setText(preferenceManager.getString(Constants.KEY_NAME));
         binding.phoneNumber.setText(preferenceManager.getString(Constants.KEY_PHONE_NUMBER));
+        binding.txtAddress.setText(preferenceManager.getString(Constants.KEY_ADDRESS));
+        binding.txtEmail.setText(preferenceManager.getString(Constants.KEY_EMAIL));
         byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE),Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);// decode image was encoded by base64
         binding.imageProfile.setImageBitmap(bitmap);
     }
-    private void setListener(){
+    private void setListener(){ //listen button event
         binding.txtLogout.setOnClickListener(v-> signOut());
         binding.imageBack.setOnClickListener(v-> {
-            startActivity(new Intent(getActivity().getApplicationContext(),MainActivity.class));
+            startActivity(new Intent(getActivity().getApplicationContext(),MainActivity.class));//start new activity
+        });
+        binding.btnSetting.setOnClickListener(v->{
+            startActivity(new Intent(getActivity().getApplicationContext(),EditProfileActivity.class));
         });
     }
 
-    private void showToast(String message){
+    private void showToast(String message){ // show message
         Toast.makeText(getActivity().getApplicationContext(),message,Toast.LENGTH_SHORT).show();
     }
 
-    private void signOut(){
+    private void signOut(){ //Log out account
         showToast("Signing out...");
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         DocumentReference documentReference =
                 database.collection(Constants.KEY_COLLECTION_USERS)
                         .document(preferenceManager.getString(Constants.KEY_USER_ID));
         HashMap<String,Object> updates = new HashMap<>();
-        updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());
+        updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());//delete token when user log out
         documentReference.update(updates)
                 .addOnSuccessListener(unused -> {
                     preferenceManager.clear();

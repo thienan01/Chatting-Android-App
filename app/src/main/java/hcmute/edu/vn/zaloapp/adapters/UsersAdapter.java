@@ -17,9 +17,9 @@ import hcmute.edu.vn.zaloapp.models.User;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
 
-    private  final List<User> users;
+    private  final List<User> users; //list of user
 
-    private final UserListener userListener;
+    private final UserListener userListener; //listen event when user click on item
 
     public UsersAdapter(List<User> users, UserListener userListener) {
         this.users = users;
@@ -39,7 +39,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        holder.setUserData(users.get(position));
+        holder.setUserData(users.get(position)); // set data for each item
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
             super(itemContainerUserBinding.getRoot());
             binding = itemContainerUserBinding;
         }
-        void setUserData(User user){
+        void setUserData(User user){ //set data for view
             binding.textName.setText(user.name);
             binding.textPhoneNum.setText(user.phoneNum);
             binding.imageProfile.setImageBitmap(getUserImage(user.image));
@@ -61,7 +61,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
         }
     }
 
-    private Bitmap getUserImage(String encodedImage){
+    private Bitmap getUserImage(String encodedImage){ //decode image string to bitmap
         byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
     }

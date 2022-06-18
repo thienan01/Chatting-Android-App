@@ -18,4 +18,6 @@
     <color name="primary_3nd">#1DA1F2</color>
     <color name="chat_background">#e4e8ec</color>
     <color name="send_message_color">#cceffd</color>
+    <color name="theme_color">#f4f6fb</color>
+    <color name="text_2">#2b2832</color>
 </resources>

@@ -40,11 +40,11 @@ import hcmute.edu.vn.zaloapp.utilities.Constants;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 
 public class MessageFragment extends Fragment implements ConversationListener {
-    private FragmentMessageBinding binding;
-    private PreferenceManager preferenceManager;
-    private List<ChatMessage> conversation;
-    private RecentConversationsAdapter conversationsAdapter;
-    private FirebaseFirestore database;
+    private FragmentMessageBinding binding; //get View through binding
+    private PreferenceManager preferenceManager; // get data stored in PreferenceManager
+    private List<ChatMessage> conversation; //store list of conversation loaded from database
+    private RecentConversationsAdapter conversationsAdapter; // adapter of recycle view
+    private FirebaseFirestore database; //Connect database to access data
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -62,12 +62,12 @@ public class MessageFragment extends Fragment implements ConversationListener {
         setListener();
     }
 
-    private void setListener(){
+    private void setListener(){//listen button event
         binding.addIcon.setOnClickListener(v->{
             startActivity(new Intent(getActivity().getApplicationContext(), ContactFragment.class));
         });
     }
-    private void init(){
+    private void init(){ //initialize conversation component
         conversation = new ArrayList<>();
         conversationsAdapter = new RecentConversationsAdapter(conversation,this);
         binding.conversationsRecycleView.setAdapter(conversationsAdapter);
@@ -75,11 +75,11 @@ public class MessageFragment extends Fragment implements ConversationListener {
     }
 
 
-    private void showToast(String message){
+    private void showToast(String message){//show message to user
         Toast.makeText(getActivity().getApplicationContext(),message,Toast.LENGTH_SHORT).show();
     }
 
-    private void  listenerConversation(){
+    private void  listenerConversation(){ //listen the changes of conversation. Are there new conversation.
         database.collection(Constants.KEY_COLLECTION_CONVERSATION)
                 .whereEqualTo(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .addSnapshotListener(eventListener);
@@ -133,11 +133,10 @@ public class MessageFragment extends Fragment implements ConversationListener {
         }
     };
 
-    private void getToken(){
+    private void getToken(){ //get token from data base
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(this::updateToken);
-
     }
-    private void updateToken(String token){
+    private void updateToken(String token){ //update token. If user are login. token will be created
         preferenceManager.putString(Constants.KEY_FCM_TOKEN, token);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         DocumentReference documentReference =
@@ -149,7 +148,7 @@ public class MessageFragment extends Fragment implements ConversationListener {
     }
 
     @Override
-    public void onConversationClicked(User user) {
+    public void onConversationClicked(User user) { //call back function to get data of user when user click on item of recycle view
         Intent intent = new Intent(getActivity().getApplicationContext(),ChatActivity.class);
         intent.putExtra(Constants.KEY_USER,user);
         startActivity(intent);

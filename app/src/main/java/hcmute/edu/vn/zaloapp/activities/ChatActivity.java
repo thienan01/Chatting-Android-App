@@ -12,12 +12,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
+
+import com.devlomi.record_view.OnRecordListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentChange;
@@ -26,6 +31,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.jitsi.meet.sdk.JitsiMeet;
 import org.jitsi.meet.sdk.JitsiMeetActivity;
@@ -35,7 +42,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,6 +64,7 @@ import hcmute.edu.vn.zaloapp.models.User;
 import hcmute.edu.vn.zaloapp.network.ApiClient;
 import hcmute.edu.vn.zaloapp.network.ApiService;
 import hcmute.edu.vn.zaloapp.utilities.Constants;
+import hcmute.edu.vn.zaloapp.utilities.Permissions;
 import hcmute.edu.vn.zaloapp.utilities.PreferenceManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,18 +72,21 @@ import retrofit2.Response;
 
 public class ChatActivity extends BaseActivity {
 
-    private ActivityChatBinding binding;
-    private  User receiverUser;
-    private List<ChatMessage> chatMessages;
-    private ChatAdapter chatAdapter;
-    private PreferenceManager preferenceManager;
-    private FirebaseFirestore database;
-    private  String conversationId;
-    private boolean isPickImageVisible;
-    private  boolean isOptionLayoutVisible;
-    private boolean isVideoCallLayoutVisible;
-    private  String encodedImage;
-    private  boolean isReceiverAvailable = false;
+    private ActivityChatBinding binding; //get view through binding
+    private  User receiverUser; //Store receiver info
+    private List<ChatMessage> chatMessages; //List of messages
+    private ChatAdapter chatAdapter; //Use for recycle view
+    private PreferenceManager preferenceManager; //get data stored in Preference manager
+    private FirebaseFirestore database; //Connect to database
+    private  String conversationId; //store conversation id
+    private boolean isPickImageVisible; // flag var to know pick image layout is visible or not
+    private  boolean isOptionLayoutVisible; //flag var to know option layout is visible or not
+    private boolean isVideoCallLayoutVisible; //flag var to know video call layout is visible or not
+    private  String encodedImage; //store encode string of image encoded by base64
+    private  boolean isReceiverAvailable = false; //flag var to know active status;
+    private Permissions permissions; // grant permission
+    private MediaRecorder mediaRecorder; //Record audio
+    private String audioPath;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +95,14 @@ public class ChatActivity extends BaseActivity {
         isPickImageVisible = false;
         isOptionLayoutVisible = false;
         isVideoCallLayoutVisible = false;
+        permissions = new Permissions();
         encodedImage = "";
         cameraPermission();
         setListener();
         loadReceiverDetail();
         init();
         listenMessages();
+//        initViewRecord();
     }
 
     private void cameraPermission(){
@@ -96,7 +111,7 @@ public class ChatActivity extends BaseActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, 101);
         }
-    }
+    }//camera permission
 
 
     @Override
@@ -109,7 +124,7 @@ public class ChatActivity extends BaseActivity {
             binding.previewImgLayout.setVisibility(View.VISIBLE);
             binding.pickImageFrom.setVisibility(View.GONE);
         }
-    }
+    }//get image from other activity or gallery
 
     private void init(){
         preferenceManager = new PreferenceManager(getApplicationContext());
@@ -121,14 +136,14 @@ public class ChatActivity extends BaseActivity {
         );
         binding.chatRecyclerView.setAdapter(chatAdapter);
         database = FirebaseFirestore.getInstance();
-    }
+    }// initialize chat component
 
 
     private void showToast(String message){
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
+    }//show message to client
 
-    private void sendNotification(String messageBody){
+    private void sendNotification(String messageBody){//send notification to user when they are not available
         ApiClient.getClient().create(ApiService.class).sendMessage(
                 Constants.getRemoteMSGHeaders(),
                 messageBody
@@ -162,7 +177,7 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
-    private void listenAvailabilityOfReceiver(){
+    private void listenAvailabilityOfReceiver(){// listen the changes of activity status
         database.collection(Constants.KEY_COLLECTION_USERS).document(
                 receiverUser.id
         ).addSnapshotListener(ChatActivity.this,(value, error) -> {
@@ -196,7 +211,7 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    private void sendMessage(){
+    private void sendMessage(){ //Store and show message when user send message
         HashMap<String,Object> message = new HashMap<>();
         if (binding.inputMessage.getText().toString().equals("") && encodedImage.equals("")){
             Toast.makeText(this, "Enter your message", Toast.LENGTH_SHORT).show();
@@ -254,7 +269,7 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    private  void listenMessages(){
+    private  void listenMessages(){ //listen the changes of message. Are there any new message.
         database.collection(Constants.KEY_COLLECTION_CHAT)
                 .whereEqualTo(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .whereEqualTo(Constants.KEY_RECEIVER_ID, receiverUser.id)
@@ -304,7 +319,7 @@ public class ChatActivity extends BaseActivity {
             checkForConversation();
         }
     };
-    private Bitmap getBitmapFromEncodedString(String encodedImage){
+    private Bitmap getBitmapFromEncodedString(String encodedImage){//decode string of encoded image to bitmap
         if (encodedImage != null){
             byte[] bytes = Base64.decode(encodedImage,Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
@@ -313,12 +328,12 @@ public class ChatActivity extends BaseActivity {
         }
 
     }
-    private void loadReceiverDetail(){
+    private void loadReceiverDetail(){ // Load info of receiver to display
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         binding.textName.setText(receiverUser.name);
 
     }
-    private void setListener(){
+    private void setListener(){//listener button event
         binding.imageBack.setOnClickListener(v-> {
             startActivity(new Intent(getApplicationContext(),MainActivity.class));
         });
@@ -377,17 +392,17 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
-    private String getReadableDateTime(Date date){
+    private String getReadableDateTime(Date date){//Format date time
         return  new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(date);
     }
 
-    private void addConversation(HashMap<String, Object> conversation){
+    private void addConversation(HashMap<String, Object> conversation){//add conversation to database
         database.collection(Constants.KEY_COLLECTION_CONVERSATION)
                 .add(conversation)
                 .addOnSuccessListener(documentReference ->  conversationId = documentReference.getId());
     }
 
-    private void updateConversation(String  message){
+    private void updateConversation(String  message){ //update conversation
         DocumentReference documentReference =
                 database.collection(Constants.KEY_COLLECTION_CONVERSATION).document(conversationId);
         documentReference.update(
@@ -396,7 +411,7 @@ public class ChatActivity extends BaseActivity {
         );
     }
 
-    private void checkForConversation(){
+    private void checkForConversation(){ //Check conversations exist on database or not
         if (chatMessages.size() != 0){
             checkForConversationRemotely(preferenceManager.getString(Constants.KEY_USER_ID),
                     receiverUser.id);
@@ -407,7 +422,7 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    private  void checkForConversationRemotely(String senderId, String receiverId){
+    private  void checkForConversationRemotely(String senderId, String receiverId){// get conversation by sender id  and receiver id
         database.collection(Constants.KEY_COLLECTION_CONVERSATION)
                 .whereEqualTo(Constants.KEY_SENDER_ID ,senderId)
                 .whereEqualTo(Constants.KEY_RECEIVER_ID, receiverId)
@@ -423,7 +438,7 @@ public class ChatActivity extends BaseActivity {
         }
     };
 
-    private  String encodeImage(Bitmap bitmap){
+    private  String encodeImage(Bitmap bitmap){//Encode image to string by base64 to store on database
         int previewWidth = 150;
         int previewHeight = bitmap.getHeight()*previewWidth/bitmap.getWidth();
         Bitmap previewBitmap = Bitmap.createScaledBitmap(bitmap,previewWidth,previewHeight,false);
@@ -433,7 +448,7 @@ public class ChatActivity extends BaseActivity {
         return Base64.encodeToString(bytes,Base64.DEFAULT);
     }
 
-    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
+    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(//Open gallery
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK){
@@ -454,7 +469,7 @@ public class ChatActivity extends BaseActivity {
             }
     );
 
-    private void deleteConversation(){
+    private void deleteConversation(){ //Delete conversation
         database.collection(Constants.KEY_COLLECTION_CONVERSATION)
                 .whereEqualTo(Constants.KEY_RECEIVER_ID,receiverUser.id)
                 .get()
@@ -485,7 +500,7 @@ public class ChatActivity extends BaseActivity {
         startActivity(new Intent(getApplicationContext(),MainActivity.class));
     }
 
-    private void makeVideoCall(){
+    private void makeVideoCall(){ // Create new video call
         URL serverURL;
         try {
             serverURL = new URL("https://meet.jit.si");
@@ -511,8 +526,90 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
+//    private void initViewRecord(){
+//        binding.recordBtn.setRecordView(binding.recordView);
+//        binding.recordBtn.setListenForRecord(false);
+//        binding.recordBtn.setOnClickListener(view -> {
+//            if (permissions.isRecordingOk(ChatActivity.this))
+//                binding.recordBtn.setListenForRecord(true);
+//            else permissions.requestRecording(ChatActivity.this);
+//        });
+//
+//        binding.recordView.setOnRecordListener(new OnRecordListener() {
+//            @Override
+//            public void onStart() {
+//                setUpRecording();
+//                try {
+//                    mediaRecorder.prepare();
+//                    mediaRecorder.start();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                binding.inputMessage.setVisibility(View.GONE);
+//                binding.layoutGallery.setVisibility(View.GONE);
+//                binding.recordView.setVisibility(View.VISIBLE);
+//
+//            }
+//
+//            @Override
+//            public void onCancel() {
+//                mediaRecorder.reset();
+//                mediaRecorder.release();
+//                File file = new File(audioPath);
+//                if (file.exists()){
+//                    file.delete();
+//                }
+//                binding.recordView.setVisibility(View.GONE);
+//                binding.inputMessage.setVisibility(View.VISIBLE);
+//                binding.layoutGallery.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void onFinish(long recordTime) {
+//                mediaRecorder.stop();
+//                mediaRecorder.release();
+//                binding.recordView.setVisibility(View.GONE);
+//                binding.inputMessage.setVisibility(View.VISIBLE);
+//                binding.layoutGallery.setVisibility(View.VISIBLE);
+//                sendRecordingMessage(audioPath);
+//            }
+//
+//            @Override
+//            public void onLessThanSecond() {
+//                mediaRecorder.reset();
+//                mediaRecorder.release();
+//                File file = new File(audioPath);
+//                if (file.exists()){
+//                    file.delete();
+//                }
+//                binding.recordView.setVisibility(View.GONE);
+//                binding.inputMessage.setVisibility(View.VISIBLE);
+//                binding.layoutGallery.setVisibility(View.VISIBLE);
+//            }
+//        });
+//    }
+
+    private void setUpRecording(){
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),"ZaloApp/Media/Recording");
+
+        if (!file.exists()){
+            file.mkdirs();
+        }
+        audioPath = file.getAbsolutePath() +File.separator + System.currentTimeMillis() + ".3gp";
+        mediaRecorder.setOutputFile(audioPath);
+    }
+    private void sendRecordingMessage(String audioPath){
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference(preferenceManager.getString(Constants.KEY_USER_ID)+"/"+receiverUser.id+"/Media/Recording/"+System.currentTimeMillis());
+        Uri audioFile = Uri.fromFile(new File(audioPath));
+        storageReference.putFile(audioFile);
+    }
     @Override
-    protected void onResume() {
+    protected void onResume() {//Update active status
         super.onResume();
         listenAvailabilityOfReceiver();
     }
